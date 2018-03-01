@@ -1,6 +1,11 @@
-## Changelog (Current version: 0.9.1)
+## Changelog (Current version: 1.0.0)
 
 -----------------
+
+### 1.0.0 (2018 Mar 01)
+
+* [3535e7d] prepare for 1.0.0
+* [4634bfb] bitrise.yml update, run_if: ".IsCI" (#2)
 
 ### 0.9.1 (2016 Jun 29)
 
@@ -10,4 +15,4 @@
 
 -----------------
 
-Updated: 2016 Jun 29
+Updated: 2018 Mar 01
