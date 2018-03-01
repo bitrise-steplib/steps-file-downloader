@@ -1,4 +1,4 @@
-format_version: "2"
+format_version: "5"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
@@ -40,7 +40,7 @@ workflows:
         inputs:
         - content: |
             #!/usr/bin/env bash
-            if [ ! -e "release.apk" ]; then
+            if [[ ! -e "release.apk" ]]; then
                 echo "Does not exist: release.apk"
                 exit 1
             fi
@@ -54,7 +54,7 @@ workflows:
         inputs:
         - content: |
             #!/usr/bin/env bash
-            if [ ! -e "./dir/release.apk" ]; then
+            if [[ ! -e "./dir/release.apk" ]]; then
                 echo "Does not exist: ./dir/release.apk"
                 exit 1
             fi
@@ -68,7 +68,7 @@ workflows:
         inputs:
         - content: |
             #!/usr/bin/env bash
-            if [ ! -e ".my/destination/dir/release.apk" ]; then
+            if [[ ! -e ".my/destination/dir/release.apk" ]]; then
                 echo "Does not exist: .my/destination/dir/release.apk"
                 exit 1
             fi
@@ -82,7 +82,7 @@ workflows:
         inputs:
         - content: |
             #!/usr/bin/env bash
-            if [ ! -e "$HOME/destination/dir/release.apk" ]; then
+            if [[ ! -e "$HOME/destination/dir/release.apk" ]]; then
                 echo "Does not exist: ~/destination/dir/release.apk"
                 exit 1
             fi
