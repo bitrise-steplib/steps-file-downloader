@@ -86,6 +86,20 @@ workflows:
                 echo "Does not exist: ~/destination/dir/release.apk"
                 exit 1
             fi
+    - path::./:
+        title: Step Test - Destination with withespace
+        inputs:
+        - source: $SOURCE
+        - destination: ~/destination withespace/dir/release.apk
+    - script:
+        title: Output test
+        inputs:
+        - content: |
+            #!/usr/bin/env bash
+            if [[ ! -e "$HOME/destination withespace/dir/release.apk" ]]; then
+                echo "Does not exist: ~/destination withespace/dir/release.apk"
+                exit 1
+            fi
 
   # ----------------------------------------------------------------
   # --- workflows to create Release

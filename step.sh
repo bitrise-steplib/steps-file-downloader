@@ -76,9 +76,9 @@ validate_required_input "destination" $destination
 # Download
 echo_info "Downloading $source to $destination"
 
-dir=$(dirname $destination)
+dir=$(dirname "${destination}")
 dir="${dir/#\~/$HOME}"
-base=$(basename $destination)
+base=$(basename "${destination}")
 
 if [ -n "$dir" ] && [ ! -d "$dir" ] ; then
 	mkdir -p "$dir"
@@ -87,4 +87,4 @@ fi
 destination="$dir/$base"
 
 set -x
-wget "$source" --output-document="$destination"
+wget "${source}" --output-document="${destination}"
