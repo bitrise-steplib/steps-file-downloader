@@ -1,6 +1,11 @@
-## Changelog (Current version: 1.0.0)
+## Changelog (Current version: 1.0.1)
 
 -----------------
+
+### 1.0.1 (2018 Jul 04)
+
+* [3999222] Prepare for 1.0.1
+* [d54a694] Destination whitespace fix (#3)
 
 ### 1.0.0 (2018 Mar 01)
 
@@ -15,4 +20,4 @@
 
 -----------------
 
-Updated: 2018 Mar 01
+Updated: 2018 Jul 04
