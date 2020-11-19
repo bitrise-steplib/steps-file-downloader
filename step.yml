@@ -1,6 +1,21 @@
 title: File Downloader
-summary: Downloands files
-description: Downloands files
+summary: Downloads files for your build.
+description: |-
+  The Step downloads selected files from a URL and places it where you want it to. 
+  
+  ### Configuring the Step 
+  
+  1. Add a source to the **Download source URL** input. It can be either an Environment Variable or a URL.
+  1. Add a destination to the **Download destination path** input. The path should be relative to the root directory of the repository.
+  
+  ### Useful links
+  
+  - [Using the File Downloader Step](https://devcenter.bitrise.io/tutorials/download-or-replace-project-resources/#using-the-file-downloader-step)
+  - [Managing files on Bitrise](https://devcenter.bitrise.io/getting-started/managing-files-on-bitrise/)
+  
+  ### Related Steps 
+  
+  - [Generate Text File](https://www.bitrise.io/integrations/steps/generate-text-file)
 website: https://github.com/bitrise-steplib/steps-file-downloader
 source_code_url: https://github.com/bitrise-steplib/steps-file-downloader
 support_url: https://github.com/bitrise-steplib/steps-file-downloader/issues
