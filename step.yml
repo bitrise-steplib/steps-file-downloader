@@ -1,6 +1,6 @@
 title: File Downloader
 summary: Downloands files for your build.
-description: -|
+description: |-
   The Step downloads selected files from a URL and places it where you want it to. 
   
   ### Configuring the Step 
