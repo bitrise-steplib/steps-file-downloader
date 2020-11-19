@@ -1,5 +1,5 @@
 title: File Downloader
-summary: Downloands files for your build.
+summary: Downloads files for your build.
 description: |-
   The Step downloads selected files from a URL and places it where you want it to. 
   
