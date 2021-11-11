@@ -1,5 +1,5 @@
 title: File Downloader
-summary: Downloads files for your build.
+summary: Download remote files to the build machine.
 description: |-
   The Step downloads selected files from a URL and places it where you want it to. 
   
@@ -31,13 +31,18 @@ run_if: ".IsCI"
 inputs:
 - source:
   opts:
-    title: Download source url
-    description: |
-      Download source url
+    title: Download source URL
+    summary: Download source URL
     is_required: true
 - destination:
   opts:
     title: Download destination path
-    description: |
-      Download destination path
+    summary: Download destination path
     is_required: true
+- file_permission:
+    title: Destination file permission
+    summary: Permission bits for the destination file
+    description: |
+      Permission bits for the destination file in the format of `644`.
+
+      This option is useful for sensitive files that should have a permission like `600`.
