@@ -40,9 +40,10 @@ inputs:
     summary: Download destination path
     is_required: true
 - file_permission:
-    title: Destination file permission
-    summary: Permission bits for the destination file
-    description: |
-      Permission bits for the destination file in the format of `644`.
+    opts:
+      title: Destination file permission
+      summary: Permission bits for the destination file
+      description: |
+        Permission bits for the destination file in the format of `644`.
 
-      This option is useful for sensitive files that should have a permission like `600`.
+        This option is useful for sensitive files that should have a permission like `600`.
