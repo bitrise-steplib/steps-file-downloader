@@ -69,6 +69,7 @@ function print_and_run {
 echo_info "Configs:"
 echo_details "* source: $source"
 echo_details "* destination: $destination"
+echo_details "* file_permission $file_permission"
 
 validate_required_input "source" $source
 validate_required_input "destination" $destination
@@ -88,3 +89,8 @@ destination="$dir/$base"
 
 set -x
 wget "${source}" --output-document="${destination}"
+
+if [ -n "${file_permission}" ] ; then
+	echo_info "Set file permission to ${file_permission}"
+	chmod "${file_permission}" "${destination}"
+fi

@@ -100,6 +100,21 @@ workflows:
                 echo "Does not exist: ~/destination withespace/dir/release.apk"
                 exit 1
             fi
+    - path::./:
+        title: Step Test - File permission
+        inputs:
+        - source: $SOURCE
+        - destination: ./sensitive_file
+        - file_permission: 600
+    - script:
+        title: Check file permission
+        inputs:
+        - content: |-
+            set -ex
+            if [ $(stat -f "%A" ./sensitive_file) != 600 ]; then
+              echo "Downloaded file permission is not 600"
+              exit 1
+            fi
 
   # ----------------------------------------------------------------
   # --- workflows to create Release
