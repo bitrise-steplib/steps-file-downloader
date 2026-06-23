@@ -1,18 +1,14 @@
 format_version: "11"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
-# TODO: Re-enable the shared `check` workflow once the Go implementation lands.
-# The steps-check `check` workflow runs golangci-lint and `go test`, which require
-# the Go code that is not in the repo yet. The `e2e` harness below is
-# implementation-agnostic and validates the step as-is.
-# include:
-# - repository: steps-check
-#   branch: master
-#   path: steps.bitrise.yml
+include:
+- repository: steps-check
+  branch: master
+  path: steps.bitrise.yml
 
 workflows:
 
-  # check: included from steps-check/steps.bitrise.yml (disabled until the Go code lands)
+  # check: included from steps-check/steps.bitrise.yml
 
   e2e:
     steps:

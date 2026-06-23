@@ -39,7 +39,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | --- | --- | --- | --- |
 | `source` | The URL to download the file from. It can be either a direct URL or an Environment Variable that holds the URL. | required |  |
 | `destination` | The path where the downloaded file will be saved. The path should be relative to the root directory of the repository. Any missing parent directories are created automatically, and a leading `~` is expanded to the home directory. | required |  |
-| `file_permission` | Permission bits for the destination file in the format of `644`.  This option is useful for sensitive files that should have a permission like `600`.  When left empty, the file keeps the default permission set during download. |  |  |
+| `file_permission` | Permission bits for the destination file in the format of `644`.  This option is useful for sensitive files that should have a permission like `600`. |  |  |
 </details>
 
 <details>

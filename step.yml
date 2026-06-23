@@ -25,6 +25,10 @@ type_tags:
 
 run_if: .IsCI
 
+toolkit:
+  go:
+    package_name: github.com/bitrise-steplib/steps-file-downloader
+
 inputs:
 - source:
   opts:
