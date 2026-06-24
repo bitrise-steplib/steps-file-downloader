@@ -15,7 +15,7 @@ workflows:
         inputs:
         - path: ./_tmp
         - is_create_path: true
-    - path::../:
+    - path::./:
         title: Download to a file in the working directory
         inputs:
         - source: $SOURCE
@@ -30,7 +30,7 @@ workflows:
               echo "Does not exist: release.apk"
               exit 1
             fi
-    - path::../:
+    - path::./:
         title: Download to a nested directory
         inputs:
         - source: $SOURCE
@@ -45,7 +45,7 @@ workflows:
               echo "Does not exist: ./dir/release.apk"
               exit 1
             fi
-    - path::../:
+    - path::./:
         title: Download to a hidden nested directory
         inputs:
         - source: $SOURCE
@@ -60,7 +60,7 @@ workflows:
               echo "Does not exist: .my/destination/dir/release.apk"
               exit 1
             fi
-    - path::../:
+    - path::./:
         title: Download to a path with a leading tilde
         inputs:
         - source: $SOURCE
@@ -75,7 +75,7 @@ workflows:
               echo "Does not exist: ~/destination/dir/release.apk"
               exit 1
             fi
-    - path::../:
+    - path::./:
         title: Download to a path containing whitespace
         inputs:
         - source: $SOURCE
@@ -100,7 +100,7 @@ workflows:
         inputs:
         - path: ./_tmp
         - is_create_path: true
-    - path::../:
+    - path::./:
         title: Download with file_permission 600
         inputs:
         - source: $SOURCE
