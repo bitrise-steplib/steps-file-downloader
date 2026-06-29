@@ -1,0 +1,121 @@
+format_version: "11"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  - SOURCE: https://raw.githubusercontent.com/bitrise-samples/sample-artifacts/master/filestructure/debug.apk
+
+workflows:
+  test_download_to_destinations:
+    description: Downloads the source to several destination paths and verifies the file is created at each.
+    steps:
+    - change-workdir:
+        title: Switch working dir to test _tmp dir
+        run_if: "true"
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - path::./:
+        title: Download to a file in the working directory
+        inputs:
+        - source: $SOURCE
+        - destination: release.apk
+    - script:
+        title: Verify release.apk exists
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -e
+            if [[ ! -e "release.apk" ]]; then
+              echo "Does not exist: release.apk"
+              exit 1
+            fi
+    - path::./:
+        title: Download to a nested directory
+        inputs:
+        - source: $SOURCE
+        - destination: ./dir/release.apk
+    - script:
+        title: Verify ./dir/release.apk exists
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -e
+            if [[ ! -e "./dir/release.apk" ]]; then
+              echo "Does not exist: ./dir/release.apk"
+              exit 1
+            fi
+    - path::./:
+        title: Download to a hidden nested directory
+        inputs:
+        - source: $SOURCE
+        - destination: .my/destination/dir/release.apk
+    - script:
+        title: Verify .my/destination/dir/release.apk exists
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -e
+            if [[ ! -e ".my/destination/dir/release.apk" ]]; then
+              echo "Does not exist: .my/destination/dir/release.apk"
+              exit 1
+            fi
+    - path::./:
+        title: Download to a path with a leading tilde
+        inputs:
+        - source: $SOURCE
+        - destination: ~/destination/dir/release.apk
+    - script:
+        title: Verify ~/destination/dir/release.apk exists
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -e
+            if [[ ! -e "$HOME/destination/dir/release.apk" ]]; then
+              echo "Does not exist: ~/destination/dir/release.apk"
+              exit 1
+            fi
+    - path::./:
+        title: Download to a path containing whitespace
+        inputs:
+        - source: $SOURCE
+        - destination: ~/destination withespace/dir/release.apk
+    - script:
+        title: Verify the path with whitespace exists
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -e
+            if [[ ! -e "$HOME/destination withespace/dir/release.apk" ]]; then
+              echo "Does not exist: ~/destination withespace/dir/release.apk"
+              exit 1
+            fi
+
+  test_file_permission:
+    description: Downloads the source with a custom file permission and verifies the permission bits are applied.
+    steps:
+    - change-workdir:
+        title: Switch working dir to test _tmp dir
+        run_if: "true"
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - path::./:
+        title: Download with file_permission 600
+        inputs:
+        - source: $SOURCE
+        - destination: ./sensitive_file
+        - file_permission: "600"
+    - script:
+        title: Verify the file permission is 600
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -e
+            # Linux (GNU stat) first, fall back to BSD/macOS stat.
+            permission="$(stat -c "%a" ./sensitive_file 2>/dev/null || stat -f "%Lp" ./sensitive_file)"
+            if [[ "$permission" != "600" ]]; then
+              echo "Downloaded file permission is $permission, expected 600"
+              exit 1
+            fi
+            echo "File permission is 600, as expected"
