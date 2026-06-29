@@ -126,7 +126,7 @@ workflows:
     description: With use_sudo disabled, a download to a root-owned directory fails. Skipped when running as root.
     steps:
     - script:
-        title: Verify the step fails on a protected destination without sudo
+        title: Skip when running as root
         inputs:
         - content: |-
             #!/usr/bin/env bash
@@ -135,8 +135,12 @@ workflows:
               echo "Running as root; no location is permission-protected, skipping."
               exit 0
             fi
-            sudo rm -rf "$PROTECTED_DIR"
-            sudo install -d -o root -m 700 "$PROTECTED_DIR"
+    - bundle::setup_protected: {}
+    - script:
+        title: Verify the step fails on a protected destination without sudo
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
             bitrise run --config e2e/bitrise.yml _download_protected_no_sudo
             code=$?
             sudo rm -rf "$PROTECTED_DIR"
