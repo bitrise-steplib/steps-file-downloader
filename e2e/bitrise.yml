@@ -4,118 +4,178 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - SOURCE: https://raw.githubusercontent.com/bitrise-samples/sample-artifacts/master/filestructure/debug.apk
+  # Root-owned, 0700 directory used to exercise the sudo fallback. Created (and
+  # the build user locked out) by the setup_protected step bundle.
+  - PROTECTED_DIR: /tmp/fd-e2e-protected
+  - PROTECTED_DEST: /tmp/fd-e2e-protected/downloaded_file
+
+step_bundles:
+  # Switch to an isolated working directory for the test.
+  goto_tmp:
+    steps:
+    - change-workdir:
+        title: Switch working dir to test _tmp dir
+        run_if: "true"
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+
+  # Download $SOURCE to $DESTINATION (with use_sudo enabled), then verify
+  # $CHECK_PATH exists and, when $PERMISSION is set, was downloaded with and
+  # ended up with those bits.
+  # Set $VERIFY_SUDO to "sudo" when $CHECK_PATH lives in a root-owned directory.
+  download_and_verify:
+    inputs:
+    - DESTINATION: ""
+    - CHECK_PATH: ""
+    - PERMISSION: ""
+    - VERIFY_SUDO: ""
+    steps:
+    - path::./:
+        title: Download to $DESTINATION
+        inputs:
+        - source: $SOURCE
+        - destination: $DESTINATION
+        - file_permission: $PERMISSION
+        - use_sudo: "true"
+    - script:
+        title: Verify $CHECK_PATH
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -e
+            if ! $VERIFY_SUDO test -e "$CHECK_PATH"; then
+              echo "Does not exist: $CHECK_PATH"
+              exit 1
+            fi
+            if [ -n "$PERMISSION" ]; then
+              # macOS uses BSD stat; Linux uses GNU stat.
+              if [ "$(uname)" = "Darwin" ]; then
+                permission="$($VERIFY_SUDO stat -f "%Lp" "$CHECK_PATH")"
+              else
+                permission="$($VERIFY_SUDO stat -c "%a" "$CHECK_PATH")"
+              fi
+              if [ "$permission" != "$PERMISSION" ]; then
+                echo "Permission is $permission, expected $PERMISSION"
+                exit 1
+              fi
+            fi
+            echo "Verified $CHECK_PATH"
+
+  # Create the root-owned, 0700 protected directory ($PROTECTED_DIR).
+  setup_protected:
+    steps:
+    - script:
+        title: Create root-owned protected destination directory
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            sudo rm -rf "$PROTECTED_DIR"
+            sudo install -d -o root -m 700 "$PROTECTED_DIR"
+
+  # Remove the protected directory (runs even if a previous step failed).
+  cleanup_protected:
+    steps:
+    - script:
+        title: Remove protected destination directory
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -e
+            sudo rm -rf "$PROTECTED_DIR"
 
 workflows:
   test_download_to_destinations:
     description: Downloads the source to several destination paths and verifies the file is created at each.
     steps:
-    - change-workdir:
-        title: Switch working dir to test _tmp dir
-        run_if: "true"
+    - bundle::goto_tmp: {}
+    - bundle::download_and_verify:
         inputs:
-        - path: ./_tmp
-        - is_create_path: true
-    - path::./:
-        title: Download to a file in the working directory
+        - DESTINATION: release.apk
+        - CHECK_PATH: release.apk
+    - bundle::download_and_verify:
         inputs:
-        - source: $SOURCE
-        - destination: release.apk
-    - script:
-        title: Verify release.apk exists
+        - DESTINATION: ./dir/release.apk
+        - CHECK_PATH: ./dir/release.apk
+    - bundle::download_and_verify:
         inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -e
-            if [[ ! -e "release.apk" ]]; then
-              echo "Does not exist: release.apk"
-              exit 1
-            fi
-    - path::./:
-        title: Download to a nested directory
+        - DESTINATION: .my/destination/dir/release.apk
+        - CHECK_PATH: .my/destination/dir/release.apk
+    - bundle::download_and_verify:
         inputs:
-        - source: $SOURCE
-        - destination: ./dir/release.apk
-    - script:
-        title: Verify ./dir/release.apk exists
+        - DESTINATION: ~/destination/dir/release.apk
+        - CHECK_PATH: $HOME/destination/dir/release.apk
+    - bundle::download_and_verify:
         inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -e
-            if [[ ! -e "./dir/release.apk" ]]; then
-              echo "Does not exist: ./dir/release.apk"
-              exit 1
-            fi
-    - path::./:
-        title: Download to a hidden nested directory
-        inputs:
-        - source: $SOURCE
-        - destination: .my/destination/dir/release.apk
-    - script:
-        title: Verify .my/destination/dir/release.apk exists
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -e
-            if [[ ! -e ".my/destination/dir/release.apk" ]]; then
-              echo "Does not exist: .my/destination/dir/release.apk"
-              exit 1
-            fi
-    - path::./:
-        title: Download to a path with a leading tilde
-        inputs:
-        - source: $SOURCE
-        - destination: ~/destination/dir/release.apk
-    - script:
-        title: Verify ~/destination/dir/release.apk exists
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -e
-            if [[ ! -e "$HOME/destination/dir/release.apk" ]]; then
-              echo "Does not exist: ~/destination/dir/release.apk"
-              exit 1
-            fi
-    - path::./:
-        title: Download to a path containing whitespace
-        inputs:
-        - source: $SOURCE
-        - destination: ~/destination withespace/dir/release.apk
-    - script:
-        title: Verify the path with whitespace exists
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -e
-            if [[ ! -e "$HOME/destination withespace/dir/release.apk" ]]; then
-              echo "Does not exist: ~/destination withespace/dir/release.apk"
-              exit 1
-            fi
+        - DESTINATION: ~/destination withespace/dir/release.apk
+        - CHECK_PATH: $HOME/destination withespace/dir/release.apk
 
   test_file_permission:
     description: Downloads the source with a custom file permission and verifies the permission bits are applied.
     steps:
-    - change-workdir:
-        title: Switch working dir to test _tmp dir
-        run_if: "true"
+    - bundle::goto_tmp: {}
+    - bundle::download_and_verify:
         inputs:
-        - path: ./_tmp
-        - is_create_path: true
-    - path::./:
-        title: Download with file_permission 600
-        inputs:
-        - source: $SOURCE
-        - destination: ./sensitive_file
-        - file_permission: "600"
+        - DESTINATION: ./sensitive_file
+        - CHECK_PATH: ./sensitive_file
+        - PERMISSION: "600"
+
+  test_use_sudo_disabled_protected_fails:
+    description: With use_sudo disabled, a download to a root-owned directory fails. Skipped when running as root.
+    steps:
     - script:
-        title: Verify the file permission is 600
+        title: Verify the step fails on a protected destination without sudo
         inputs:
         - content: |-
             #!/usr/bin/env bash
-            set -e
-            # Linux (GNU stat) first, fall back to BSD/macOS stat.
-            permission="$(stat -c "%a" ./sensitive_file 2>/dev/null || stat -f "%Lp" ./sensitive_file)"
-            if [[ "$permission" != "600" ]]; then
-              echo "Downloaded file permission is $permission, expected 600"
+            set -x # Do not set -e: the inner bitrise run is expected to fail
+            if [ "$(id -u)" -eq 0 ]; then
+              echo "Running as root; no location is permission-protected, skipping."
+              exit 0
+            fi
+            sudo rm -rf "$PROTECTED_DIR"
+            sudo install -d -o root -m 700 "$PROTECTED_DIR"
+            bitrise run --config e2e/bitrise.yml _download_protected_no_sudo
+            code=$?
+            sudo rm -rf "$PROTECTED_DIR"
+            if [ $code -eq 0 ]; then
+              echo "Expected the step to fail without sudo, but it succeeded."
               exit 1
             fi
-            echo "File permission is 600, as expected"
+            echo "Step failed as expected without sudo."
+
+  test_use_sudo_enabled_protected:
+    description: With use_sudo enabled, a download to a root-owned directory succeeds via the sudo fallback.
+    steps:
+    - bundle::setup_protected: {}
+    - bundle::download_and_verify:
+        inputs:
+        - DESTINATION: $PROTECTED_DEST
+        - CHECK_PATH: $PROTECTED_DEST
+        - VERIFY_SUDO: sudo
+    - bundle::cleanup_protected: {}
+
+  test_use_sudo_enabled_protected_permission:
+    description: With use_sudo enabled, the file_permission is applied via sudo at a protected destination.
+    steps:
+    - bundle::setup_protected: {}
+    - bundle::download_and_verify:
+        inputs:
+        - DESTINATION: $PROTECTED_DEST
+        - CHECK_PATH: $PROTECTED_DEST
+        - PERMISSION: "600"
+        - VERIFY_SUDO: sudo
+    - bundle::cleanup_protected: {}
+
+  # Utility workflow used by test_use_sudo_disabled_protected_fails. The `_`
+  # prefix keeps it out of the unified CI test run; it is invoked explicitly.
+  _download_protected_no_sudo:
+    steps:
+    - path::./:
+        title: Download to a protected destination without sudo
+        inputs:
+        - source: $SOURCE
+        - destination: $PROTECTED_DEST
+        - use_sudo: "false"

@@ -56,3 +56,20 @@ inputs:
       Permission bits for the destination file in the format of `644`.
 
       This option is useful for sensitive files that should have a permission like `600`.
+- use_sudo: "true"
+  opts:
+    title: Use sudo as a fallback for protected destinations
+    summary: Retry the file placement with sudo if it fails due to insufficient permissions.
+    description: |-
+      When enabled, if writing the downloaded file to the destination fails
+      because of a permission error, the Step retries the operation using
+      `sudo`.
+
+      The download itself is never run as root — only the destination directory
+      creation, the file placement, and the permission change are retried with
+      `sudo`. This requires passwordless (`sudo -n`) access on the machine.
+
+      Disable this if you do not want the Step to ever escalate privileges.
+    value_options:
+    - "true"
+    - "false"
